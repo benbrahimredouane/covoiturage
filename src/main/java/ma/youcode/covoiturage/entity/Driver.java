@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @NoArgsConstructor
 @Getter
@@ -23,7 +26,6 @@ public class Driver {
     @Column(nullable = false)
     String prenom;
 
-
     @Column(nullable = false ,unique = true)
     String email;
 
@@ -32,6 +34,10 @@ public class Driver {
 
     @Column(nullable = false,unique = true)
     String permisN;
+
+
+    @OneToMany(mappedBy = "driver")
+    List<Vehicle> vehicles = new ArrayList<>();
 
 
 
