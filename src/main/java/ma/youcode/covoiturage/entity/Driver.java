@@ -41,6 +41,9 @@ public class Driver {
             @JsonIgnore
     List<Vehicle> vehicles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "driver")
+    @JsonIgnore
+    List<Trajet> trajets = new ArrayList<>();
 
 
 }
