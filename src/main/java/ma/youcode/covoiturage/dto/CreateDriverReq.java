@@ -4,6 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import ma.youcode.covoiturage.entity.Vehicle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public record CreateDriverReq(
 
@@ -26,5 +30,6 @@ public record CreateDriverReq(
 
         @NotBlank(message = "permis number must not be blank")
         String permisN
+
 
 ) { }

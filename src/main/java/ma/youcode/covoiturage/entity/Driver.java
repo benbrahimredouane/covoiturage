@@ -1,5 +1,6 @@
 package ma.youcode.covoiturage.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,7 @@ public class Driver {
 
 
     @OneToMany(mappedBy = "driver")
+            @JsonIgnore
     List<Vehicle> vehicles = new ArrayList<>();
 
 
