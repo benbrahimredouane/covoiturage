@@ -1,6 +1,7 @@
 package ma.youcode.covoiturage.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Setter
+@Getter
 public class StopPoint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +26,7 @@ public class StopPoint {
     private BigDecimal prixDepuitsDepart;
 
     @Column(nullable = false)
-    private Integer order;
+    private Integer steps;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trajet_id" , nullable = false)

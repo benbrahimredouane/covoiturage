@@ -1,6 +1,9 @@
 package ma.youcode.covoiturage.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ma.youcode.covoiturage.entity.enums.StatutTrajet;
 
 import java.time.LocalDateTime;
@@ -10,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Trajet {
     @Id
             @GeneratedValue(strategy = GenerationType.IDENTITY)
