@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface VehicleService {
     public Vehicle create(CreateVehicleReq req);
-    public Vehicle findById(Long id);
+    public Vehicle findById(Long id , Long driverId);
     public Vehicle updateVehicle(Long id , ModifierVehicleReq req);
-    public List<Vehicle> findthem();
+    public List<Vehicle> findByDriver(Long driverId);
     public void delete(Long id , DeleteVehicleReq req);
 }
