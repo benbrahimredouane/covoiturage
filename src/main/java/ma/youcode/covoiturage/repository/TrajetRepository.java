@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface TrajetRepository extends JpaRepository<Trajet, Long>, JpaSpecificationExecutor<Trajet> {
 
@@ -35,4 +36,5 @@ public interface TrajetRepository extends JpaRepository<Trajet, Long>, JpaSpecif
             @Param("dateFin") LocalDateTime dateFin,
             Pageable pageable
     );
+    Optional<Trajet> findByIdForUpdate(Long id);
 }
