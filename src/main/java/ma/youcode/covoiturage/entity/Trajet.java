@@ -42,7 +42,7 @@ public class Trajet {
     @OneToMany(mappedBy = "trajet",
             cascade = CascadeType.ALL ,
             orphanRemoval = true)
-    @OrderBy("order ASC ")
+    @OrderBy("steps ASC ")
     private List<StopPoint> stopPoints = new ArrayList<>();
 
     public void addStopPoint(StopPoint stopPoint){

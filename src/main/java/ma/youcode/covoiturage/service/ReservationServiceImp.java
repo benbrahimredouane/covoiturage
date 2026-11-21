@@ -2,11 +2,14 @@ package ma.youcode.covoiturage.service;
 
 import lombok.extern.slf4j.Slf4j;
 import ma.youcode.covoiturage.common.exception.BusinessRuleException;
+import ma.youcode.covoiturage.common.exception.ForbiddenActionException;
 import ma.youcode.covoiturage.common.exception.InvalidSegmentException;
 import ma.youcode.covoiturage.common.exception.PassengerNotFoundException;
+import ma.youcode.covoiturage.common.exception.ReservationNotFoundException;
 import ma.youcode.covoiturage.common.exception.TrajetNotFoundException;
 import ma.youcode.covoiturage.dto.CreateReservationReq;
 import ma.youcode.covoiturage.dto.CreateReservationRes;
+import ma.youcode.covoiturage.dto.ReservationRes;
 import ma.youcode.covoiturage.entity.Passenger;
 import ma.youcode.covoiturage.entity.Reservation;
 import ma.youcode.covoiturage.entity.StopPoint;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -94,6 +98,65 @@ public class ReservationServiceImp implements ReservationService {
                 montee.getVille(), descente.getVille(), req.nbPlaces(), montant);
 
         return reservationMapper.toDto(reservation, placesRestantes);
+    }
+
+    // PASSENGER : consult ONE reservation, only his own
+    @Transactional(readOnly = true)
+    @Override
+    public ReservationRes findById(Long id , Long passengerId){
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(()->
+                new ReservationNotFoundException("reservation with id "+id+" not exists"));
+        checkOwner(reservation, passengerId);
+        return reservationMapper.toRes(reservation);
+    }
+
+    // PASSENGER : consult his reservations
+    @Transactional(readOnly = true)
+    @Override
+    public List<ReservationRes> findByPassenger(Long passengerId){
+        if (!passengerRepository.existsById(passengerId)){
+            throw new PassengerNotFoundException("passenger with id "+passengerId+" not exists");
+        }
+        return reservationRepository.findAllByPassengerId(passengerId).stream()
+                .map(reservationMapper::toRes)
+                .toList();
+    }
+
+    // PASSENGER : cancel HIS reservation, until 24 hours before the departure
+    @Transactional
+    @Override
+    public void cancel(Long id , Long passengerId){
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(()->
+                new ReservationNotFoundException("reservation with id "+id+" not exists"));
+        checkOwner(reservation, passengerId);
+
+        Trajet trajet = trajetRepository.findByIdForUpdate(reservation.getTrajet().getId()).orElseThrow(()->
+                new TrajetNotFoundException("trajet with id "+reservation.getTrajet().getId()+" not exists"));
+
+        if (reservation.getStatut() != StatutReservation.CONFIRMEE){
+            throw new BusinessRuleException("this reservation is already cancelled");
+        }
+        if (LocalDateTime.now().isAfter(trajet.getStartDate().minusHours(24))){
+            throw new BusinessRuleException("a reservation can be cancelled until 24 hours before the departure");
+        }
+
+        reservation.setStatut(StatutReservation.ANNULEE);
+        reservationRepository.save(reservation);
+
+        // a place is free again
+        if (trajet.getStatutTrajet() == StatutTrajet.COMPLET){
+            trajet.setStatutTrajet(StatutTrajet.PUBLIE);
+            trajetRepository.save(trajet);
+        }
+
+        log.info("reservation {} cancelled by passenger {} , trajet {} is {}",
+                id, passengerId, trajet.getId(), trajet.getStatutTrajet());
+    }
+
+    private void checkOwner(Reservation reservation , Long passengerId){
+        if (!reservation.getPassenger().getId().equals(passengerId)){
+            throw new ForbiddenActionException("this reservation is not yours");
+        }
     }
 
     private StopPoint findStop(Trajet trajet , String ville){

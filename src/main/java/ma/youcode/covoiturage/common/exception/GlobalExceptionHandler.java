@@ -2,8 +2,10 @@ package ma.youcode.covoiturage.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
@@ -35,15 +38,7 @@ public class GlobalExceptionHandler {
         problem.setProperty("errors",errors);
         return problem;
     }
-    @ExceptionHandler(VehicleNotFoundException.class)
-    public ProblemDetail handleVehicleException(VehicleNotFoundException exception , HttpServletRequest req){
-        ProblemDetail problem = createProblem(
-                HttpStatus.NOT_FOUND ,
-                exception.getMessage(),
-                exception.getMessage(),
-                req);
-        return problem;
-    }
+
     @ExceptionHandler(MatriculeNotUniqueException.class)
     public ProblemDetail handleUniqueException(MatriculeNotUniqueException exception , HttpServletRequest req){
         ProblemDetail problemDetail = createProblem(
@@ -54,16 +49,7 @@ public class GlobalExceptionHandler {
         );
         return problemDetail;
     }
-    @ExceptionHandler(DriverNotFoundException.class)
-    public ProblemDetail handelDriverNotFoundException(DriverNotFoundException exception , HttpServletRequest req){
-        ProblemDetail problemDetail = createProblem(
-                HttpStatus.NOT_FOUND,
-                "driver nout fount",
-                exception.getMessage(),
-                req
-        );
-                return problemDetail;
-    }
+
     @ExceptionHandler(NotYourVehicleException.class)
     public ProblemDetail handleNotYourVehicleException(NotYourVehicleException exception , HttpServletRequest req){
         ProblemDetail problemDetail = createProblem(
@@ -74,24 +60,8 @@ public class GlobalExceptionHandler {
         );
         return problemDetail;
     }
-    @ExceptionHandler(TrajetNotFoundException.class)
-    public ProblemDetail handleTrajetNotFoundException(TrajetNotFoundException exception , HttpServletRequest req){
-        return createProblem(
-                HttpStatus.NOT_FOUND,
-                "trajet not found",
-                exception.getMessage(),
-                req
-        );
-    }
-    @ExceptionHandler(PassengerNotFoundException.class)
-    public ProblemDetail handlePassengerNotFoundException(PassengerNotFoundException exception , HttpServletRequest req){
-        return createProblem(
-                HttpStatus.NOT_FOUND,
-                "passenger not found",
-                exception.getMessage(),
-                req
-        );
-    }
+
+
     @ExceptionHandler(InvalidSegmentException.class)
     public ProblemDetail handleInvalidSegmentException(InvalidSegmentException exception , HttpServletRequest req){
         log.warn("rule refused : {}", exception.getMessage());
@@ -102,13 +72,63 @@ public class GlobalExceptionHandler {
                 req
         );
     }
+
+    // ---------- 403
+    @ExceptionHandler(ForbiddenActionException.class)
+    public ProblemDetail handleForbiddenActionException(ForbiddenActionException exception , HttpServletRequest req){
+        log.warn("action refused : {}", exception.getMessage());
+        return createProblem(
+                HttpStatus.FORBIDDEN,
+                "forbidden-action",
+                exception.getMessage(),
+                req
+        );
+    }
+    // ---------- 404
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException exception , HttpServletRequest req){
+        return createProblem(
+                HttpStatus.NOT_FOUND,
+                "resource-not-found",
+                exception.getMessage(),
+                req
+        );
+    }
+    // ---------- 409
     @ExceptionHandler(BusinessRuleException.class)
     public ProblemDetail handleBusinessRuleException(BusinessRuleException exception , HttpServletRequest req){
         log.warn("rule refused : {}", exception.getMessage());
         return createProblem(
                 HttpStatus.CONFLICT,
-                "business rule violated",
+                "business-rule-violated",
                 exception.getMessage(),
+                req
+        );
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException exception , HttpServletRequest req){
+        log.warn("rule refused : data integrity violation on {}", req.getRequestURI());
+        return createProblem(
+                HttpStatus.CONFLICT,
+                "data-conflict",
+                "A value that must be unique (email, license number, plate number ...) already exists",
+                req
+        );
+    }
+
+    // ---------- 500 (and the errors of Spring itself : unknown url 404, wrong method 405 ...)
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleOthers(Exception exception , HttpServletRequest req){
+        if (exception instanceof ErrorResponse errorResponse){
+            HttpStatus status = HttpStatus.valueOf(errorResponse.getStatusCode().value());
+            String message = Objects.requireNonNullElse(errorResponse.getBody().getDetail(), status.getReasonPhrase());
+            return createProblem(status, "request-error", message, req);
+        }
+        log.error("unexpected error on {}", req.getRequestURI(), exception);
+        return createProblem(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "internal-error",
+                "An unexpected error occurred",
                 req
         );
     }
