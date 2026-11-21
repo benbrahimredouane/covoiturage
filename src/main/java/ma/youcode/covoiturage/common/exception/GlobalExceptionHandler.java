@@ -1,6 +1,7 @@
 package ma.youcode.covoiturage.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +12,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private ProblemDetail createProblem(HttpStatus status , String title , String detail, HttpServletRequest req){
@@ -71,6 +73,44 @@ public class GlobalExceptionHandler {
                 req
         );
         return problemDetail;
+    }
+    @ExceptionHandler(TrajetNotFoundException.class)
+    public ProblemDetail handleTrajetNotFoundException(TrajetNotFoundException exception , HttpServletRequest req){
+        return createProblem(
+                HttpStatus.NOT_FOUND,
+                "trajet not found",
+                exception.getMessage(),
+                req
+        );
+    }
+    @ExceptionHandler(PassengerNotFoundException.class)
+    public ProblemDetail handlePassengerNotFoundException(PassengerNotFoundException exception , HttpServletRequest req){
+        return createProblem(
+                HttpStatus.NOT_FOUND,
+                "passenger not found",
+                exception.getMessage(),
+                req
+        );
+    }
+    @ExceptionHandler(InvalidSegmentException.class)
+    public ProblemDetail handleInvalidSegmentException(InvalidSegmentException exception , HttpServletRequest req){
+        log.warn("rule refused : {}", exception.getMessage());
+        return createProblem(
+                HttpStatus.BAD_REQUEST,
+                "invalid segment",
+                exception.getMessage(),
+                req
+        );
+    }
+    @ExceptionHandler(BusinessRuleException.class)
+    public ProblemDetail handleBusinessRuleException(BusinessRuleException exception , HttpServletRequest req){
+        log.warn("rule refused : {}", exception.getMessage());
+        return createProblem(
+                HttpStatus.CONFLICT,
+                "business rule violated",
+                exception.getMessage(),
+                req
+        );
     }
 
 
