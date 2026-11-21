@@ -5,9 +5,13 @@ import java.time.LocalDateTime;
 
 public record FindTripDto(
 
-        BigDecimal prix,
+        Long trajetId,
+        String startVille,
+        String endVille,
         LocalDateTime departTime,
-        LocalDateTime arrivalTime
+        LocalDateTime arrivalTime,
+        BigDecimal prix,
+        Long placesRestantes
 
 ) {
 }
