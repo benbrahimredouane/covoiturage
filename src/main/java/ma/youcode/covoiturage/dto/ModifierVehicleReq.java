@@ -18,6 +18,8 @@ public record ModifierVehicleReq(
         @Min(value = 1, message = "capacity must be greater that 1")
         @Max(value = 8 , message = "capacity must be less than 8 ")
         Integer capacite,
+
+        @NotNull(message = "driver ID is required ")
         Long driverId
 ) {
 }

@@ -3,7 +3,7 @@ package ma.youcode.covoiturage.dto;
 import jakarta.validation.constraints.NotNull;
 
 public record DeleteVehicleReq(
-        @NotNull
+        @NotNull(message = "driver id is required")
         Long driverId
 ) {
 }

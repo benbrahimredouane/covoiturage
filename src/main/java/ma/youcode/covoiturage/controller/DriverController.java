@@ -27,9 +27,4 @@ public class DriverController {
         CreateDriverRes res = driverMapper.toDto(driver);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
-    @GetMapping("/work")
-    public String working(){
-        return "yes working just fine sir";
-    }
-
 }
