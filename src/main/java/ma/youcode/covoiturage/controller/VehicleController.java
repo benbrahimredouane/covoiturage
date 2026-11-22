@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -47,9 +48,14 @@ public class VehicleController {
         return ResponseEntity.status(HttpStatus.OK).body(vehicle);
     }
     @GetMapping("/vehicles")
-        public ResponseEntity<List<Vehicle>> findAll(){
+        public ResponseEntity<List<CreateVehicleRes>> findAll(){
             List<Vehicle> vehicleList = vehicleService.findthem();
-            return ResponseEntity.status(HttpStatus.OK).body(vehicleList);
+            List<CreateVehicleRes> resList = new ArrayList<>();
+            for (Vehicle v : vehicleList){
+                CreateVehicleRes res = vehicleMapper.toDto(v);
+                resList.add(res);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(resList);
 
 
     }
