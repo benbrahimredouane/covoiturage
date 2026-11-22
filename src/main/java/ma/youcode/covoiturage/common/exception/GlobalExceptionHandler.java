@@ -33,6 +33,45 @@ public class GlobalExceptionHandler {
         problem.setProperty("errors",errors);
         return problem;
     }
+    @ExceptionHandler(VehicleNotFoundException.class)
+    public ProblemDetail handleVehicleException(VehicleNotFoundException exception , HttpServletRequest req){
+        ProblemDetail problem = createProblem(
+                HttpStatus.NOT_FOUND ,
+                exception.getMessage(),
+                exception.getMessage(),
+                req);
+        return problem;
+    }
+    @ExceptionHandler(MatriculeNotUniqueException.class)
+    public ProblemDetail handleUniqueException(MatriculeNotUniqueException exception , HttpServletRequest req){
+        ProblemDetail problemDetail = createProblem(
+                HttpStatus.CONFLICT,
+                "unique matricule",
+                exception.getMessage(),
+                req
+        );
+        return problemDetail;
+    }
+    @ExceptionHandler(DriverNotFoundException.class)
+    public ProblemDetail handelDriverNotFoundException(DriverNotFoundException exception , HttpServletRequest req){
+        ProblemDetail problemDetail = createProblem(
+                HttpStatus.NOT_FOUND,
+                "driver nout fount",
+                exception.getMessage(),
+                req
+        );
+                return problemDetail;
+    }
+    @ExceptionHandler(NotYourVehicleException.class)
+    public ProblemDetail handleNotYourVehicleException(NotYourVehicleException exception , HttpServletRequest req){
+        ProblemDetail problemDetail = createProblem(
+                HttpStatus.UNAUTHORIZED,
+                "not authorized",
+                exception.getMessage(),
+                req
+        );
+        return problemDetail;
+    }
 
 
 }
