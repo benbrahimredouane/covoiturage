@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotYourVehicleException.class)
     public ProblemDetail handleNotYourVehicleException(NotYourVehicleException exception , HttpServletRequest req){
         ProblemDetail problemDetail = createProblem(
-                HttpStatus.UNAUTHORIZED,
+                HttpStatus.FORBIDDEN,
                 "not authorized",
                 exception.getMessage(),
                 req
